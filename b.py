@@ -32,7 +32,7 @@ def get_allowed_codes():
             exec(f.read(), namespace)
         return [str(code) for code in namespace.get("ALLOWED_CODES", [])]
     except Exception as e:
-        print(f"خطأ في قراءة ملف الأكواد: {e}")
+        print(f"⚠️ خطأ في قراءة ملف الأكواد: {e}")
         return []
 
 def add_code_to_file(new_code):
@@ -52,8 +52,8 @@ def show_search_options(chat_id, user_name):
     
     bot.send_message(
         chat_id,
-        f"مرحباً بك يا {user_name} في بوت مستشفى الحسين التعليمي! 🏥\n\n"
-        "الرجاء اختيار طريقة البحث من الأزرار أدناه:",
+        f"👋 مرحباً بك يا {user_name} في بوت مستشفى الحسين التعليمي! 🏥\n\n"
+        "⚙️ الرجاء اختيار طريقة البحث من الأزرار أدناه:",
         reply_markup=keyboard
     )
 
@@ -71,7 +71,7 @@ def start_command(message):
 
     # إذا كنت أنت المشرف الحسين، تخطي الحماية وافتح خيارات البحث مباشرة
     if user_id == ADMIN_ID:
-        bot.send_message(user_id, "مرحباً أيها المشرف الحسين! أنت تملك الصلاحية الكاملة لإدارة البوت الآن.")
+        bot.send_message(user_id, "👑 مرحباً أيها المشرف الحسين! أنت تملك الصلاحية الكاملة لإدارة البوت الآن.")
         show_search_options(message.chat.id, user_name)
         return
 
@@ -81,7 +81,7 @@ def start_command(message):
         return
 
     # طلب الكود من المستخدم العادي إذا لم يكن مفعلاً
-    bot.reply_to(message, "🔒 عذراً، هذا النظام مغلق ومحمي. يرجى إرسال كود التفعيل الخاص بك للدخول:")
+    bot.reply_to(message, "🔒 عذراً، هذا النظام مغلق ومحمي.\n🔑 يرجى إرسال كود التفعيل الخاص بك للدخول:")
     USERS_AWAITING_CODE.add(user_id)
 
 
@@ -95,7 +95,7 @@ def handle_all_callbacks(call):
     # 1. قسم معالجة قرارات المشرف (قبول / رفض الكود)
     if call.data.startswith(('accept_', 'reject_')):
         if user_id != ADMIN_ID:
-            bot.answer_callback_query(call.id, "عذراً، أنت لست المشرف المصرح له!", show_alert=True)
+            bot.answer_callback_query(call.id, "❌ عذراً، أنت لست المشرف المصرح له!", show_alert=True)
             return
 
         data_parts = call.data.split('_')
@@ -109,8 +109,8 @@ def handle_all_callbacks(call):
             if target_user_id in USERS_AWAITING_CODE:
                 USERS_AWAITING_CODE.remove(target_user_id)
             
-            bot.edit_message_text(f"✅ تم قبول المستخدم بنجاح، وتم حفظ الكود `{target_code}` في ملف b1.py تلقائياً.", chat_id, message_id)
-            bot.send_message(target_user_id, "🎉 مرحباً بك! لقد وافق المشرف على طلبك واعتمد الكود الخاص بك.")
+            bot.edit_message_text(f"✅ تم قبول المستخدم بنجاح، وتم حفظ الكود `{target_code}` في الملف تلقائياً.", chat_id, message_id)
+            bot.send_message(target_user_id, "🎉 مرحباً بك! لقد وافق المشرف على طلبك واعتمد الكود الخاص بك بنجاح.")
             # إظهار خيارات البحث للمستخدم المقبول فوراً
             show_search_options(target_user_id, call.message.reply_to_message.from_user.first_name if call.message.reply_to_message else "المستخدم")
             
@@ -122,9 +122,8 @@ def handle_all_callbacks(call):
         return
 
     # 2. قسم معالجة أزرار البحث (اسم الجهاز / الرقم التسلسلي)
-    # التحقق أولاً من صلاحية المستخدم قبل معالجة خيارات البحث
     if user_id != ADMIN_ID and user_id not in ACTIVATED_USERS:
-        bot.answer_callback_query(call.id, "🔒 يجب التفعيل أولاً.", show_alert=True)
+        bot.answer_callback_query(call.id, "🔒 يجب التفعيل أولاً والاستحصال على الموافقة.", show_alert=True)
         return
 
     bot.answer_callback_query(call.id)
@@ -151,25 +150,25 @@ def handle_all_messages(message):
         if text_input in allowed_codes:
             ACTIVATED_USERS.add(user_id)
             USERS_AWAITING_CODE.remove(user_id)
-            bot.reply_to(message, "✅ الكود صحيح ومعتمد مسبقاً! تم السماح لك بالدخول واستخدام البوت.")
+            bot.reply_to(message, "✅ الكود صحيح ومعتمد مسبقاً! تم السماح لك بالدخول واستخدام النظام.")
             show_search_options(message.chat.id, user_name)
             return
 
         # الكود جديد، يرسل للمشرف
-        bot.reply_to(message, "⏳ هذا الكود غير مسجل مسبقاً. تم إرسال طلب تفعيل إلى المشرف للمراجعة، يرجى الانتظار...")
+        bot.reply_to(message, "⏳ هذا الكود غير مسجل مسبقاً.\n📬 تم إرسال طلب تفعيل إلى المشرف للمراجعة، يرجى الانتظار...")
         
         markup = InlineKeyboardMarkup()
         approve_btn = InlineKeyboardButton("قبول ✅", callback_data=f"accept_{user_id}_{text_input}")
         reject_btn = InlineKeyboardButton("رفض ❌", callback_data=f"reject_{user_id}")
         markup.add(approve_btn, reject_btn)
         
-        user_info = f"👤 **طلب دخول جديد لبوت مستشفى الحسين:**\n\nالاسم: {user_name}\nاليوزر: @{message.from_user.username}\nالآيدي: `{user_id}`\n\n🔑 **الكود المُدخل:** `{text_input}`"
+        user_info = f"👤 **طلب دخول جديد لبوت مستشفى الحسين:**\n\n🔹 **الاسم:** {user_name}\n🔹 **اليوزر:** @{message.from_user.username}\n🔹 **الآيدي:** `{user_id}`\n\n🔑 **الكود المُدخل:** `{text_input}`"
         bot.send_message(ADMIN_ID, user_info, reply_markup=markup, parse_mode="Markdown")
         return
 
     # ثانياً: منع الوصول للمستخدمين العاديين غير المفعلين الذين يرسلون رسائل عشوائية
     if user_id != ADMIN_ID and user_id not in ACTIVATED_USERS:
-        bot.reply_to(message, "🔒 الوصول ممنوع. يجب عليك إدخال كود تفعيل معتمد أولاً عبر أمر /start.")
+        bot.reply_to(message, "🔒 الوصول ممنوع. يجب عليك إدخال كود تفعيل معتمد أولاً عبر إرسال /start.")
         USERS_AWAITING_CODE.add(user_id)
         return
 
@@ -185,7 +184,7 @@ def handle_all_messages(message):
         bot.reply_to(message, "❌ عذراً، ملف جرد الإكسل غير موجود في المسار المحدد على سطح المكتب.")
         return
 
-    bot.reply_to(message, "🔍 جاري البحث في قاعدة البيانات وإحضار كافة النتائج...")
+    bot.reply_to(message, "🔍 جاري البحث في قاعدة البيانات وإحضار كافة النتائج المطابقة...")
 
     try:
         # قراءة البيانات مع تجاوز أول سطرين لبدء القراءة من السطر الثالث (B3, E3)
@@ -214,23 +213,23 @@ def handle_all_messages(message):
         # عرض كافة النتائج دون أي قيود أو استثناءات
         if not result.empty:
             total_found = len(result)
-            bot.send_message(message.chat.id, f"✅ تم العثور على ({total_found}) من النتائج المطابقة:")
+            bot.send_message(message.chat.id, f"🎉 تم العثور على ({total_found}) من النتائج المطابقة:")
 
             for idx, row in result.iterrows():
                 response_text = f"📋 **بيانات الجهاز رقم {idx + 1}:**\n"
-                response_text += "-----------------------------------\n"
+                response_text += "━━━━━━━━━━━━━━━━━━━━\n"
                 
                 for column, value in row.items():
                     if pd.notna(value) and str(value).lower() != 'nan':
                         response_text += f"🔹 **{column}:** {value}\n"
                         
-                response_text += "-----------------------------------"
+                response_text += "━━━━━━━━━━━━━━━━━━━━"
                 bot.send_message(message.chat.id, response_text, parse_mode="Markdown")
         else:
             bot.reply_to(message, f"❌ لم يتم العثور على أي نتائج تطابق: `{text_input}`")
 
     except Exception as e:
-        bot.reply_to(message, f"❌ حدث خطأ أثناء معالجة البيانات: {e}")
+        bot.reply_to(message, f"⚠️ حدث خطأ أثناء معالجة البيانات: {e}")
 
     # مسح حالة البحث الحالية للمستخدم حتى يختار طريقة جديدة
     if user_id in USER_SEARCH_MODE:
@@ -240,5 +239,5 @@ def handle_all_messages(message):
 
 
 # تشغيل البوت باستمرار
-print("🤖 البوت الموحد يعمل الآن ومحمى بنظام التفعيل ومربوط بملف الإكسل بنجاح...")
+print("🚀 البوت يعمل الآن ومحمى بنظام التفعيل ومربوط بملف الإكسل بنجاح...")
 bot.polling(none_stop=True)
