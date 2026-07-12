@@ -16,8 +16,9 @@ ADMIN_ID = 224931513  # معرفك الرقمي كمشرف لحساب @ll8lll
 bot = telebot.TeleBot(API_TOKEN)
 
 # مسارات الملفات على جهازك / السيرفر
-FILE_PATH_CODES = r"/home/KARRAR123/ahussein/b1.py"  # تم تعديل المسار ليناسب السيرفر بدلاً من الـ Desktop
-FILE_PATH_EXCEL = r"/home/KARRAR123/ahussein/جرد 2023.xlsx" # يرجى التأكد من رفع ملف الإكسل داخل مجلد ahussein
+FILE_PATH_CODES = r"/home/KARRAR123/ahussein/b1.py" 
+# تم تعديل اسم الملف هنا إلى الاسم الجديد لتفادي مشكلة مسارات الحروف العربية
+FILE_PATH_EXCEL = r"/home/KARRAR123/ahussein/jard2023.xlsx" 
 
 # مصفوفات مؤقتة في الذاكرة لتتبع حالة المستخدمين وطرق البحث
 ACTIVATED_USERS = set()
@@ -227,4 +228,4 @@ def handle_all_messages(message):
 
 # تشغيل البوت
 print("🚀 البوت يعمل الآن ومحمى بنظام التفعيل ومربوط بملف الإكسل بنجاح...")
-bot.polling(none_stop=True)True)
+bot.polling(none_stop=True)
